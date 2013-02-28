@@ -106,15 +106,8 @@ config.prototype.set = function(option) {
 	* This must be replace by the respective routine from database.js
 	* By: Husain AlKhamees
 	*/
-	// var db = Ti.Database.open(_config_db.name);
-	// var rs = db.execute('SELECT tag,value FROM config WHERE tag=?', tag);
-
-	// if (option.unique && rs.isValidRow())
-	// db.execute('UPDATE config SET value WHERE tag=?', option.tag, escape(JSON.stringify(option)));
-	// else
-	// db.execute('INSERT INTO config (tag,value) VALUES (?,?)', option.tag, escape(JSON.stringify(option)));
-	// db.close();
-	var cond = 'tag=' + this.option.tag;
+	
+	var cond = {'=':{tag:this.option.tag}};
 	var record = prepareRecord(this.option);
 	// console.log(record);
 	if (record.value.unique)
@@ -147,9 +140,7 @@ config.prototype.unset = function(tag) {
 	 * By: Husain AlKhamees
 	 */
 	var result = true;
-	// var db = Ti.Database.open(_config_db.name);
-	// db.execute('DELETE FROM config WHERE tag=?', tag);
-	// db.close();
+	
 	result = db.deleteRecords(tb_name, tag)
 	return result;
 }
@@ -161,25 +152,20 @@ config.prototype.get = function(tag) {//why not being more flexible by adding (f
 	 * By: Husain AlKhamees
 	 */
 	var results = null;
-	// var db = Ti.Database.open(_config_db.name);
-	// var rs = db.execute('SELECT tag,value FROM config WHERE tag=?', tag);
-	// if (rs.isValidRow()) {
-	// results = JSON.parse(unescape(rs.fieldByName('value')));
-	// if (!results.unique) {
-	// var temp = results;
-	// results = null;
-	// results[0] = temp;
-	// for (var rs = db.execute('SELECT tag,value FROM config WHERE tag=?', tag), count = 1; rs.isValidRow(); rs.next())
-	// results[count++] = JSON.parse(unescape(rs.fieldByName('value')));
-	// }
-	// }
-	// db.close();
+	
+	//  for consistency, change this to JSON Object, too
 	fields = ['tag', 'value'];
 	var cond = 'tag=' + JSON.stringify(tag);
+	var cond = {'=':{'tag':tag}}
 	db.getRecords_Cond(tb_name, fields, cond, function(rows) {
-		for (var i in rows) {
-			// console.log(JSON.parse(unescape(rows[i].value));
-		}
+		
+		if(rows.length !== 0)
+			console.log(rows);
+		else
+			console.log(false);
+		// for (var i in rows) {
+			// console.log(i);
+		// }
 	});
 	return results;
 }
@@ -189,25 +175,29 @@ config.prototype.get = function(tag) {//why not being more flexible by adding (f
 module.exports = option;
 module.exports = config;
 
-// var r = new config(new option('i'));
-// console.log(r.option.unique);
-//
-// var rss = new option('RSSFeed');
-// console.log(rss);
-//
+var RSS = new option('RSSFeed');
+ // console.log(rss);
 // //updating a tag within the same option
-// rss.set('tag', 'updated tag');
+ // RSS.set('tag', 'updated tag');
 // //adding a tag within the same option
-// rss.set('NewTag', 'another tag');
+ RSS.set('NewTag', 'another tag');
 // //adding a tag as another option
-// rss.URL = 'http://www.test.com';
-// console.log(rss);
-var rssOption = new option('RSSFeed');
-// console.log(rssOption);
-var rssConfig = new config(rssOption);
+ RSS.URL = 'http://www.test.com';
+
+var rssConfig = new config(RSS);
 // console.log(rssConfig.option);
 rssConfig.set(rssConfig.option);
+rssConfig.set(rssConfig.option);
+
+
+var font = new option('Font');
+var fontConfig = new config(font);
+fontConfig.set(font);
+
 rssConfig.get('RSSFeed');
+rssConfig.get('Font');
+// console.log(rssOption.option);
+
 
 /*
 * Modified by: Husain AlKhamees

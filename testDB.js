@@ -18,13 +18,13 @@ var tb_fields = {
 };
 
 var record1 = {
-	tag : 10,
-	value : {tag: 'RSSFeed', unique: true, other: 'this is a text'}
+	tag : 'RSSFeed1',
+	value : {tag: 'RSSFeed1', unique: true, other: 'this is a text1'}
 };
 
 var record2 = {
-	tag : 20,
-	value : {VALUE: 'this is a text 2'}
+	tag : 'RSSFeed2',
+	value : {tag: 'RSSFeed2', unique: true, other: 'this is a text2'}
 };
 
 
@@ -42,8 +42,6 @@ db.insertRecords(tb_name, record2);
 
 fields = ['tag', 'value'];
 
-console.log('Non-Conditional SELECT');
-
 /*
  * Author: Husain AlKhamees
  * Notice the callback
@@ -57,11 +55,51 @@ console.log('Non-Conditional SELECT');
  * 			3) a workaround solution to get the return value
  */
 db.getRecords(tb_name, fields, function(dataSet){
+	console.log('\ngetRecords');
 	console.log(dataSet);
 });
 
-conditions = 'tag=10';
-db.getRecords_Cond(tb_name, fields, conditions, function(dataSet){
+
+/*
+ * JSON Object: to represent a conditional WHERE statement
+ * 
+ * Right now, it represents only one condition such as the following
+ */
+
+/*
+ * JSON Object: to represent a conditional WHERE statement
+ * 
+ * This is just a premilinary example; not supported yet! 
+ */
+
+/*
+var cond = {// Equivalen to--> 'WHERE ((tag=RSSFeed1 AND value=whatever) OR (tag=RSSFeed1 OR value=whatever))'
+	OR : {//outter OR: 
+		AND : {//Inner AND: (tag=RSSFeed1 AND value=whatever)
+			'=':{tag : 'RSSFeed1'},//tag=RSSFeed1
+			'>':{value : '10'}//value>10
+		},
+		OR : {//Inner OR: (tag=RSSFeed1 OR value=whatever)
+			'=':{tag : 'RSSFeed1'},//tag=RSSFeed1
+			'<=':{value : 'whatever'}//value=whatever
+		}
+	}
+};*/
+
+
+
+
+// var cond = {
+	// '=':{
+			// tag:'RSSFeed1',
+			// tag2:'RSSFeed1'
+	// },
+	// '>':{tt:'tt'}
+	// };
+
+var cond = {'=':{tag:'RSSFeed1'}};
+db.getRecords_Cond(tb_name, fields, cond, function(dataSet){
+	console.log('\ngetRecords_Cond');
 	console.log(dataSet);
 });
 // console.log(db.getRecords_Cond(tb_name, fields, conditions));
@@ -71,16 +109,19 @@ db.getRecords_Cond(tb_name, fields, conditions, function(dataSet){
  * an example of updating a record
  */
 var newR = {
-	tag : 20,
-	value : {VALUE: 'this is an updated text 200'}
+	tag : 'RSSFeed3',
+	value : {tag: 'RSSFeed3', unique: true, other: 'this is a text3'}
 };
-var cond = 'tag=20';
+
+var cond = {'=':{tag:'RSSFeed1'}};
 db.updateRecords(tb_name, newR, cond);
 db.getRecords(tb_name, fields, function(dataSet){
+	console.log('\nAfter Updaing - getRecords');
 	console.log(dataSet);
 });
 db.closeDB();
 
+// console.log(JSON.parse('"test"'));
 // var text = 'he{llo';
 // console.log(escape(text));
 // console.log(unescape(text));
@@ -89,4 +130,4 @@ db.closeDB();
  * Warning: Asynchronous nature
  * This will be be executed first!!
  */
-console.log(1);
+// console.log(1);

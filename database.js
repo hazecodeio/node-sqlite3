@@ -60,6 +60,7 @@ function setFields(tb_fields) {
 
 	return fields;
 }
+
 //Helping method to be used in createTable()
 /***************************************************************/
 
@@ -124,9 +125,9 @@ function getValues(records) {//records: is of type key-value pair
 		// values += '\"' + escape(JSON.stringify(records[key])) + '\"' + ', ';
 		// values += JSON.stringify(records[key]) + ', ';
 		// values += JSON.stringify(escape(records[key])) + ', ';
-		// values += escape(JSON.stringify((records[key]))) + ', ';		
+		// values += escape(JSON.stringify((records[key]))) + ', ';
 	}
-	
+
 	values = values.substr(0, values.length - 2);
 	values += ')';
 
@@ -137,13 +138,58 @@ function getValues(records) {//records: is of type key-value pair
 
 Database.prototype.updateRecords = function(tb_name, newRecords, cond) {
 
-	var updatedValues;
-	updatedValues = getUpdateValues(newRecords);
-	console.log(updatedValues);
-	// console.log(values);
+	var updatedValues = getUpdateValues(newRecords);
+	// console.log(updatedValues);
+	cond = formatConditions(cond);
+	// console.log(cond);
 	this.db.run('UPDATE ' + tb_name + ' SET ' + updatedValues + ' WHERE ' + cond);
 
 }
+function formatConditions(cond) {
+
+	// var AND = 'and'.toUpperCase();
+	// var OR = 'or'.toUpperCase();
+
+	/*
+	 * use 'count' for nested conditions and parantheses
+	 * close to the concept in compilers design
+	 */
+	/*
+	 var c = '(';
+	 if (cond.hasOwnProperty('AND') || cond.hasOwnProperty('OR')) {
+	 var c = '(';
+	 for (var i in cond) {//get AND or OR
+
+	 c += i + '=' + JSON.stringify(escape(JSON.stringify(cond[i]))) + ')';
+	 }
+	 } else {
+	 for (var i in cond) {
+
+	 c += i + '=' + JSON.stringify(escape(JSON.stringify(cond[i]))) + ')';
+	 }
+	 }*/
+// console.log(cond['cond']);
+	var c = '(';
+	for (var i in cond) {
+		// console.log('tag1: ' + i);
+		var json = JSON.stringify(cond[i]);
+		// console.log('value1: ' + json);
+		for (var j in cond[i]){
+			c += j;//field name
+			c += i;// equality sign
+			// console.log('tag2: ' + j);
+			c += JSON.stringify(escape(JSON.stringify(cond[i][j])));//value to be compared
+			// console.log('value2: ' + cond[i][j]);
+			c += ')';
+		}
+		
+		// console.log(c);
+		
+	}
+	
+	return c;
+}
+
 function getUpdateValues(records) {
 
 	var updatedValues = '';
@@ -172,18 +218,21 @@ function getUpdateValues(records) {
  */
 Database.prototype.getRecords = function(tb_name, fields, callback) {
 
-	var rows;
 	this.db.all('SELECT ' + getFields(fields) + ' FROM ' + tb_name, function(err, rows) {
 		if (err)
 			throw err;
 
-		if (rows.length === 0) {
-			console.log(false);
-			return false;
-		}
-		
-		for(var i in rows){
-			rows[i].value = unescape(rows[i].value);
+		//handle this case in the callback function
+		// if (rows.length === 0) {
+			// console.log(false);
+			// pass boolean value to the callback
+			// return false;
+		// }
+
+		for (var i in rows) {
+			for (var j in rows[i]) {
+				rows[i][j] = JSON.parse(unescape(rows[i][j]));
+			}
 		}
 
 		/*
@@ -203,18 +252,24 @@ Database.prototype.getRecords = function(tb_name, fields, callback) {
 }
 Database.prototype.getRecords_Cond = function(tb_name, fields, conditions, callback) {
 
+	conditions = formatConditions(conditions);
+	// console.log(conditions)
 	this.db.all('SELECT ' + getFields(fields) + ' FROM ' + tb_name + ' WHERE ' + conditions, function(err, rows) {
 
 		if (err)
 			throw err;
 
-		if (rows.length === 0) {
-			console.log(false);
-			return false;
-		}
-		
-		for(var i in rows){
-			rows[i].value = unescape(rows[i].value);
+		//handle this case in the callback function
+		// if (rows.length === 0) {
+			// console.log(false);
+			// pass boolean value to the callback
+			// return false;
+		// }
+
+		for (var i in rows) {
+			for (var j in rows[i]) {
+				rows[i][j] = JSON.parse(unescape(rows[i][j]));
+			}
 		}
 
 		/*

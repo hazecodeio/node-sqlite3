@@ -101,11 +101,6 @@ config.prototype.backup = function(flag) {
 config.prototype.set = function(option) {
 
 	var result = true;
-
-	/*
-	* This must be replace by the respective routine from database.js
-	* By: Husain AlKhamees
-	*/
 	
 	var cond = {'=':{tag:this.option.tag}};
 	var record = prepareRecord(this.option);
@@ -134,27 +129,32 @@ function prepareRecord(option) {
 }
 
 config.prototype.unset = function(tag) {
-
 	/*
 	 * Any Titanium-specific routine must be replace by the respective routine from database.js
 	 * By: Husain AlKhamees
 	 */
-	var result = true;
 	
-	result = db.deleteRecords(tb_name, tag)
-	return result;
+	var cond = {'=':{'tag':tag}};
+	db.deleteRecords_Cond(tb_name, cond);
+	
+	// db.getRecords_Cond(tb_name, fields, function(dataSet){	
+		// console.log(tag);
+		// db.deleteRecords(tb_name, tag);	
+	// });
+	
 }
 
 config.prototype.get = function(tag) {//why not being more flexible by adding (fields and conditions) in the parameter
 
 	/*
-	 * Any Titanium-specific routine must be replace by the respective routine from database.js
+	 * Any Titanium-specific routine must be replaced by the respective routine from database.js
 	 * By: Husain AlKhamees
 	 */
 	var results = null;
 	
 	//  for consistency, change this to JSON Object, too
 	fields = ['tag', 'value'];
+	console.log(getFields(_config_db.fields));
 	var cond = 'tag=' + JSON.stringify(tag);
 	var cond = {'=':{'tag':tag}}
 	db.getRecords_Cond(tb_name, fields, cond, function(rows) {
@@ -168,6 +168,20 @@ config.prototype.get = function(tag) {//why not being more flexible by adding (f
 		// }
 	});
 	return results;
+}
+function getFields(fields) {//fields: is of type array
+
+	var f = '';
+	for (var key in fields) {
+		f += key + ', ';
+	}
+
+	f = f.substr(0, f.length - 2);
+	f += '';
+
+	// console.log(fields);
+	return f;
+
 }
 /*
  * exports() is used in conjuntion with require()

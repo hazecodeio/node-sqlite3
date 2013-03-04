@@ -87,7 +87,8 @@ Database.prototype.clearTable = function(tb_name) {
  */
 Database.prototype.deleteRecords = function(tb_name, cond) {
 
-	this.db.run('DELETE FROM ' + tb_name + ' WHERE ' + cond);
+	var conditions = prepareConditions(cond);
+	this.db.run('DELETE FROM ' + tb_name + ' WHERE ' + conditions);
 
 }
 /*
@@ -96,15 +97,15 @@ Database.prototype.deleteRecords = function(tb_name, cond) {
 Database.prototype.insertRecords = function(tb_name, records) {//records: is of type key-value pair
 
 	var keys, values;
-	keys = getKeys(records);
-	values = getValues(records);
+	keys = prepareKeys(records);
+	values = prepareValues(records);
 	// console.log(keys);
 	// console.log(values);
 	this.db.run('INSERT INTO ' + tb_name + keys + ' VALUES ' + values);
 
 }
 //Helping method to be used in insertRecord()
-function getKeys(records) {//records: is of type key-value pair
+function prepareKeys(records) {//records: is of type key-value pair
 
 	var keys = '(';
 	for (var key in records) {
@@ -118,7 +119,7 @@ function getKeys(records) {//records: is of type key-value pair
 }
 
 //Helping method to be used in insertRecord()
-function getValues(records) {//records: is of type key-value pair
+function prepareValues(records) {//records: is of type key-value pair
 	var values = '(';
 	for (var key in records) {
 		values += JSON.stringify(escape(JSON.stringify(records[key]))) + ', ';
@@ -138,14 +139,14 @@ function getValues(records) {//records: is of type key-value pair
 
 Database.prototype.updateRecords = function(tb_name, newRecords, cond) {
 
-	var updatedValues = getUpdateValues(newRecords);
+	var updatedValues = prepareUpdateValues(newRecords);
 	// console.log(updatedValues);
-	cond = formatConditions(cond);
+	cond = prepareConditions(cond);
 	// console.log(cond);
 	this.db.run('UPDATE ' + tb_name + ' SET ' + updatedValues + ' WHERE ' + cond);
 
 }
-function formatConditions(cond) {
+function prepareConditions(cond) {
 
 	// var AND = 'and'.toUpperCase();
 	// var OR = 'or'.toUpperCase();
@@ -190,7 +191,7 @@ function formatConditions(cond) {
 	return c;
 }
 
-function getUpdateValues(records) {
+function prepareUpdateValues(records) {
 
 	var updatedValues = '';
 	for (var key in records) {
@@ -218,7 +219,7 @@ function getUpdateValues(records) {
  */
 Database.prototype.getRecords = function(tb_name, fields, callback) {
 
-	this.db.all('SELECT ' + getFields(fields) + ' FROM ' + tb_name, function(err, rows) {
+	this.db.all('SELECT ' + prepareFields(fields) + ' FROM ' + tb_name, function(err, rows) {
 		if (err)
 			throw err;
 
@@ -252,9 +253,9 @@ Database.prototype.getRecords = function(tb_name, fields, callback) {
 }
 Database.prototype.getRecords_Cond = function(tb_name, fields, conditions, callback) {
 
-	conditions = formatConditions(conditions);
+	conditions = prepareConditions(conditions);
 	// console.log(conditions)
-	this.db.all('SELECT ' + getFields(fields) + ' FROM ' + tb_name + ' WHERE ' + conditions, function(err, rows) {
+	this.db.all('SELECT ' + prepareFields(fields) + ' FROM ' + tb_name + ' WHERE ' + conditions, function(err, rows) {
 
 		if (err)
 			throw err;
@@ -287,19 +288,29 @@ Database.prototype.getRecords_Cond = function(tb_name, fields, conditions, callb
 
 }
 //Helping method to be used in getRecords() and getRecords_Cond()
-function getFields(fieldsArray) {//fields: is of type array
+function prepareFields(fields) {//fields: is of type key-value pair
 
-	var fields = '';
-	for (var i = 0; i < fieldsArray.length; i++) {
-		fields += fieldsArray[i] + ', ';
+	// var fields = '';
+	// for (var i = 0; i < fieldsArray.length; i++) {
+		// fields += fieldsArray[i] + ', ';
+	// }
+// 
+	// fields = fields.substr(0, fields.length - 2);
+	// fields += '';
+// 
+	// // console.log(fields);
+	// return fields;
+	
+	
+	var f = '';
+	for (var key in fields) {
+		f += key + ', ';
 	}
 
-	fields = fields.substr(0, fields.length - 2);
-	fields += '';
-
-	// console.log(fields);
-	return fields;
-
+	f = f.substr(0, f.length - 2);
+	f += '';
+	
+	return f;
 }
 
 /***************************************************************/

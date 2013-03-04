@@ -13,7 +13,7 @@
 var db_name = 'test.db';
 var tb_name = 'tb_name';
 var tb_fields = {
-	tag : 'NUMBER',
+	tag : 'TEXT',
 	value : 'TEXT'
 };
 
@@ -40,7 +40,7 @@ db.createTable(tb_name, tb_fields);
 db.insertRecords(tb_name, record1);
 db.insertRecords(tb_name, record2);
 
-fields = ['tag', 'value'];
+// fields = ['tag', 'value'];
 
 /*
  * Author: Husain AlKhamees
@@ -54,7 +54,7 @@ fields = ['tag', 'value'];
  * 			2) a workaround solution to avoid the effect of the asynchronous nature of Javascript; especially NodeJS
  * 			3) a workaround solution to get the return value
  */
-db.getRecords(tb_name, fields, function(dataSet){
+db.getRecords(tb_name, tb_fields, function(dataSet){
 	console.log('\ngetRecords');
 	console.log(dataSet);
 });
@@ -98,7 +98,7 @@ var cond = {// Equivalen to--> 'WHERE ((tag=RSSFeed1 AND value=whatever) OR (tag
 	// };
 
 var cond = {'=':{tag:'RSSFeed1'}};
-db.getRecords_Cond(tb_name, fields, cond, function(dataSet){
+db.getRecords_Cond(tb_name, tb_fields, cond, function(dataSet){
 	console.log('\ngetRecords_Cond');
 	console.log(dataSet);
 });
@@ -115,9 +115,19 @@ var newR = {
 
 var cond = {'=':{tag:'RSSFeed1'}};
 db.updateRecords(tb_name, newR, cond);
-db.getRecords(tb_name, fields, function(dataSet){
+db.getRecords(tb_name, tb_fields, function(dataSet){
 	console.log('\nAfter Updaing - getRecords');
 	console.log(dataSet);
+});
+
+cond = {'=':{tag:'RSSFeed3'}};
+
+// var t = 'tt';
+db.deleteRecords(tb_name, cond);
+db.getRecords(tb_name, tb_fields, function(dataSet){
+	console.log('\nAfter Deleting - getRecords');
+	console.log(dataSet);
+	// console.log(t);
 });
 db.closeDB();
 

@@ -79,8 +79,6 @@ option.prototype.set = function(tag, value) {
 	 * option.hasOwnProperty(): can be used to check if the property is already there
 	 */
 }
-// exports.option = option;
-
 /*
  * to me, this is a duplicate of the Object option()!!
  */
@@ -98,19 +96,38 @@ config.prototype.backup = function(flag) {
 	// Ti.Database.setRemoteBackup(flag);
 }
 
-config.prototype.set = function(option) {
+config.prototype.set = function(option, callback) {
 
 	var result = true;
-	
-	var cond = {'=':{'tag':this.option.tag}};
-	var record = prepareRecord(this.option);
-	// console.log(record);
-	if (record.value.unique)
-		result = db.updateRecords(tb_name, record, cond);
-	else
-		result = db.insertRecords(tb_name, record);
 
-	return result;
+	var cond = {
+		'=' : {
+			'tag' : this.option.tag
+		}
+	};
+	var record = prepareRecord(this.option);
+
+	db.getRecords_Cond(_config_db.tb_name, _config_db.fields, cond, function(dataSet) {
+		
+		/*
+		 * doesn't work due to the asynchronous feature in Javascript
+		 */
+		
+		// console.log(record.value.unique + ' ' + dataSet.length);
+		if (dataSet.length !== 0 && record.value.unique) {
+			console.log('updating');
+			db.updateRecords(tb_name, record, cond);
+			db.getRecords_Cond(_config_db.tb_name, _config_db.fields, cond, function(dataSet22){callback(dataSet22)});
+		} else {
+			db.insertRecords(tb_name, record);
+			console.log('inserting');
+			db.getRecords_Cond(_config_db.tb_name, _config_db.fields, cond, function(dataSet22){callback(dataSet22)});
+			
+		}
+	});
+
+
+	// return result;
 }
 function prepareRecord(option) {
 	var record = {};
@@ -133,85 +150,105 @@ config.prototype.unset = function(tag) {
 	 * Any Titanium-specific routine must be replace by the respective routine from database.js
 	 * By: Husain AlKhamees
 	 */
-	
-	var cond = {'=':{'tag':tag}};
+
+	var cond = {
+		'=' : {
+			'tag' : tag
+		}
+	};
 	db.deleteRecords_Cond(tb_name, cond);
-	
-	// db.getRecords_Cond(tb_name, fields, function(dataSet){	
-		// console.log(tag);
-		// db.deleteRecords(tb_name, tag);	
+
+	// db.getRecords_Cond(tb_name, fields, function(dataSet){
+	// console.log(tag);
+	// db.deleteRecords(tb_name, tag);
 	// });
-	
+
 }
 
 config.prototype.get = function(tag) {//why not being more flexible by adding (fields and conditions) in the parameter
 
 	/*
-	 * Any Titanium-specific routine must be replaced by the respective routine from database.js
-	 * By: Husain AlKhamees
-	 */
-	var results = null;
-	
+	* Any Titanium-specific routine must be replaced by the respective routine from database.js
+	* By: Husain AlKhamees
+	*/
+	// var results = null;
+
 	//  for consistency, change this to JSON Object, too
 	// fields = ['tag', 'value'];
 	// console.log(getFields(_config_db.fields));
 	var cond = 'tag=' + JSON.stringify(tag);
-	var cond = {'=':{'tag':tag}}
+	var cond = {
+		'=' : {
+			'tag' : tag
+		}
+	}
 	db.getRecords_Cond(tb_name, _config_db.fields, cond, function(rows) {
-		
-		if(rows.length !== 0)
-			console.log(rows);
-		else
+
+		if (rows.length !== 0) {
+			for (var i in rows) {
+				console.log(rows[i].value);
+			}
+		} else
 			console.log(false);
 		// for (var i in rows) {
-			// console.log(i);
+		// console.log(i);
 		// }
 	});
-	return results;
+	// return results;
 }
 // function getFields(fields) {//fields: is of type array
-// 
-	// var f = '';
-	// for (var key in fields) {
-		// f += key + ', ';
-	// }
-// 
-	// f = f.substr(0, f.length - 2);
-	// f += '';
-// 
-	// // console.log(fields);
-	// return f;
-// 
+//
+// var f = '';
+// for (var key in fields) {
+// f += key + ', ';
+// }
+//
+// f = f.substr(0, f.length - 2);
+// f += '';
+//
+// // console.log(fields);
+// return f;
+//
 // }
 /*
  * exports() is used in conjuntion with require()
  */
-module.exports = option;
-module.exports = config;
 
 var RSS = new option('RSSFeed');
- // console.log(rss);
+// console.log(rss);
 // //updating a tag within the same option
- // RSS.set('tag', 'updated tag');
+// RSS.set('tag', 'updated tag');
 // //adding a tag within the same option
- RSS.set('NewTag', 'another tag');
+RSS.set('NewTag', 'another tag');
 // //adding a tag as another option
- RSS.URL = 'http://www.test.com';
+// RSS.URL = 'http://www.test.com';
 
 var rssConfig = new config(RSS);
 // console.log(rssConfig.option);
-rssConfig.set(rssConfig.option);
-rssConfig.set(rssConfig.option);
+rssConfig.set(rssConfig.option, function(rows) {
+	console.log(rows)
+});
+// rssConfig.set(rssConfig.option);
+//
+// var font = new option('Font');
+// var fontConfig = new config(font);
+// fontConfig.set(font);
+//
 
+RSS.set('NewTag', 'another tag222222');
+// rssConfig.get('RSSFeed');
+rssConfig.set(RSS.option, function(rows){
+	console.log(rows)
+});
 
-var font = new option('Font');
-var fontConfig = new config(font);
-fontConfig.set(font);
-
-rssConfig.get('RSSFeed');
-rssConfig.get('Font');
-// console.log(rssOption.option);
-
+RSS.set('unique', true);
+// rssConfig.get('RSSFeed');
+rssConfig.set(RSS.option, function(rows){
+	console.log(rows)
+});
+// rssConfig.get('RSSFeed');
+// rssConfig.get('Font');
+// console.log(RSS.option);
 
 /*
 * Modified by: Husain AlKhamees
@@ -220,3 +257,6 @@ rssConfig.get('Font');
 // _config_db.handle = Ti.Database.open(_config_db.name);
 // _config_db.handle.execute(_config_db.SQL_TABLE);
 // _config_db.handle.close();
+
+module.exports = option;
+module.exports = config;

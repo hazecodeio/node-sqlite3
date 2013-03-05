@@ -256,7 +256,9 @@ Database.prototype.getRecords_Cond = function(tb_name, fields, conditions, callb
 	conditions = prepareConditions(conditions);
 	// console.log(conditions)
 	this.db.all('SELECT ' + prepareFields(fields) + ' FROM ' + tb_name + ' WHERE ' + conditions, function(err, rows) {
-
+		
+		// console.log(tb_name)
+		
 		if (err)
 			throw err;
 
@@ -278,6 +280,7 @@ Database.prototype.getRecords_Cond = function(tb_name, fields, conditions, callb
 		 */
 		if ( typeof (callback) === 'function')
 			callback(rows);
+		// console.log(rows);
 
 	});
 

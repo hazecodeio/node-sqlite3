@@ -131,6 +131,7 @@ db.getRecords(tb_name, tb_fields, function(dataSet){
 });
 db.closeDB();
 
+// var titanium = require('titanium');
 // console.log(JSON.parse('"test"'));
 // var text = 'he{llo';
 // console.log(escape(text));
